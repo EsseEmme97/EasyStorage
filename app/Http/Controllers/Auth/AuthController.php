@@ -19,7 +19,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()]
+            'password' => ['required', Password::min(8)->letters()->numbers()->symbols()]
         ]);
 
         $user=User::create([
@@ -33,5 +33,12 @@ class AuthController extends Controller
 
         return redirect()->route('transazioni');
 
+    }
+
+    public function logout(Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
     }
 }

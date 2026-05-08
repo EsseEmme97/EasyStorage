@@ -18,22 +18,33 @@
         @endif
     </head>
     <body class="min-h-screen bg-background font-sans antialiased text-foreground">
+        {{-- <img class="absolute top-10 rleft-10 w-lg" src="{{ asset('images/easy-storage.png') }}" alt="logo del progetto"> --}}
         <div class="relative flex min-h-screen flex-col">
             <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div class="container flex h-14 items-center">
-                    <div class="mr-4 flex">
-                        <a class="mr-6 flex items-center space-x-2" href="/">
-                            <span class="font-bold inline-block">easyStorage</span>
-                        </a>
-                        <nav class="flex items-center space-x-6 text-sm font-medium">
-                            <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/">Home</a>
-                            <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/transazioni">Transazioni</a>
-                        </nav>
+                <div class="container flex h-14 items-center mx-auto">
+                    <div class="mr-4 flex justify-between items-center w-full">
+                        <div class="flex items-center">
+                            <a class="mr-6 flex items-center space-x-2" href="/">
+                                <span class="font-bold inline-block">easyStorage</span>
+                            </a>
+                            @auth
+                            <nav class="flex items-center space-x-6 text-sm font-medium">
+                                <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/">Home</a>
+                                <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/transazioni">Transazioni</a>
+                            </nav>
+                            @endauth
+                        </div>
+                        @auth  
+                        <form class="d-block ml-auto" action="{{ route('logout') }}" method="post">
+                            @csrf
+                            <button type="submit" class="action-button">Logout</button>
+                        </form>
+                        @endauth
                     </div>
                 </div>
             </header>
             <main class="flex-1">
-                <div class="container py-6 md:py-10">
+                <div class="container py-6 md:py-10 mx-auto">
                     {{ $slot }}
                 </div>
             </main>

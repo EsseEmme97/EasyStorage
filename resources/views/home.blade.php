@@ -5,7 +5,7 @@
 
     <div class="flex flex-col items-center justify-center space-y-8 py-12">
         <div class="text-center space-y-2">
-            <h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">
+            <h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl animate-bounce">
                 Welcome to <span class="text-primary">easyStorage</span>
             </h1>
             <p class="text-xl text-muted-foreground">
@@ -23,9 +23,9 @@
                 @csrf
                 <div class="space-y-2">
                     <label for="username" class="text-sm font-medium leading-none">Username</label>
-                    <input type="text" name="username" id="username" placeholder="Inserisci il tuo username" 
+                    <input type="text" name="name" id="username" placeholder="Inserisci il tuo username" 
                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                    @error('username')
+                    @error('name')
                         <p class="text-destructive text-xs font-medium">{{ $message }}</p>
                     @enderror
                 </div>
@@ -53,5 +53,13 @@
                 </button>
             </form>
         </div>
+		<div class="flex items-center gap-3 w-md">
+			<span class="bg-muted-foreground h-px w-1/2"></span>
+			<span class="text-muted-foreground">o</span>
+			<span class="bg-muted-foreground h-px w-1/2"></span>
+		</div>
+		<div>
+			<button class="action-button">Effettua il login</button>
+		</div>
     </div>
 </x-home-layout>
