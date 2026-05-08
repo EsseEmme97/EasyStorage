@@ -17,12 +17,32 @@
             </style>
         @endif
     </head>
-	<body>
-        @auth
-            <nav>
-                <a>Transazioni</a>
-                <a>Magazzino</a>
-            </nav>
-        @endauth
-		{{ $slot }}
-	</body>
+    <body class="min-h-screen bg-background font-sans antialiased text-foreground">
+        <div class="relative flex min-h-screen flex-col">
+            <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div class="container flex h-14 items-center">
+                    <div class="mr-4 flex">
+                        <a class="mr-6 flex items-center space-x-2" href="/">
+                            <span class="font-bold inline-block">easyStorage</span>
+                        </a>
+                        <nav class="flex items-center space-x-6 text-sm font-medium">
+                            <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/">Home</a>
+                            <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/transazioni">Transazioni</a>
+                        </nav>
+                    </div>
+                </div>
+            </header>
+            <main class="flex-1">
+                <div class="container py-6 md:py-10">
+                    {{ $slot }}
+                </div>
+            </main>
+            <footer class="py-6 md:px-8 md:py-0 border-t">
+                <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+                    <p class="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
+                        &copy; {{ date('Y') }} easyStorage. Built with Laravel and Tailwind.
+                    </p>
+                </div>
+            </footer>
+        </div>
+    </body>
