@@ -27,8 +27,8 @@
                     <thead class="[&_tr]:border-b">
                         <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">ID</th>
-                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Prodotto</th>
-                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Quantità</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Descrizione</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fornitore</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Data</th>
                             <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Azioni</th>
@@ -39,7 +39,7 @@
                         <tr class="border-b transition-colors hover:bg-muted/50">
                             <td class="p-4 align-middle">#TR-001</td>
                             <td class="p-4 align-middle font-medium">Scaffale Industriale</td>
-                            <td class="p-4 align-middle">12</td>
+                            <td class="p-4 align-middle">Fornitore 1</td>
                             <td class="p-4 align-middle">
                                 <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Entrata</span>
                             </td>
@@ -49,7 +49,7 @@
                         <tr class="border-b transition-colors hover:bg-muted/50">
                             <td class="p-4 align-middle">#TR-002</td>
                             <td class="p-4 align-middle font-medium">Cassetta Plastica R32</td>
-                            <td class="p-4 align-middle">50</td>
+                            <td class="p-4 align-middle">Fornitore 2   </td>
                             <td class="p-4 align-middle">
                                 <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">Uscita</span>
                             </td>
