@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function index() {
+    public function showRegistrationForm() {
         return view('home');
     }
 
@@ -40,5 +40,25 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    public function login(Request $request) {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('transazioni');
+        }
+
+        return back()->withErrors([
+            'email' => 'Le credenziali fornite non sono corrette.',
+        ])->onlyInput('email');
+    }
+
+    public function showLoginForm(){
+        return view('login');
     }
 }

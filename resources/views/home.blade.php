@@ -59,7 +59,7 @@
 			<span class="bg-muted-foreground h-px w-1/2"></span>
 		</div>
 		<div>
-			<button class="action-button">Effettua il login</button>
+			<a href="{{ route('login') }}" class="action-button">Effettua il login</a>
 		</div>
     </div>
 </x-home-layout>
