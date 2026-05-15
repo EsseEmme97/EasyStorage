@@ -50,7 +50,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('transazioni');
+            return redirect()->route('transactions');
         }
 
         return back()->withErrors([
