@@ -90,12 +90,17 @@
         <div class="rounded-md border">
             <div class="border-b p-4">
                 <label for="suppliers-search" class="block text-sm font-medium">Cerca Fornitore</label>
-                <input
-                    id="suppliers-search"
-                    type="text"
-                    class="mt-1 w-full rounded-md border px-3 py-2"
-                    placeholder="Cerca per nome o codice"
-                >
+                <div class="flex items-center gap-4">
+                    <input
+                        id="suppliers-search"
+                        type="text"
+                        class="mt-1 w-full rounded-md border px-3 py-2"
+                        placeholder="Cerca per nome o codice"
+                    >
+                    <svg id="resetResearch" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 hover:text-slate-500 transition-colors">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
             </div>
             <div class="relative w-full overflow-auto">
                 <table class="w-full caption-bottom text-sm">

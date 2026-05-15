@@ -50,8 +50,9 @@
                             </a>
                             @auth
                             <nav class="flex items-center space-x-6 text-sm font-medium">
-                                <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="/">Home</a>
-                                <a class="transition-colors hover:text-foreground/80 text-foreground/60" href="{{ route('transactions') }}">Transazioni</a>
+                                <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'home' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground': '' }}" href="/">Home</a>
+                                <a class=" relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'transactions' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('transactions') }}">Transazioni</a>
+                                <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'suppliers' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('suppliers') }}">Fornitori</a>
                             </nav>
                             @endauth
                         </div>
