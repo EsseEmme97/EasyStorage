@@ -51,8 +51,8 @@
                             @auth
                             <nav class="flex items-center space-x-6 text-sm font-medium">
                                 <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'home' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground': '' }}" href="/">Home</a>
-                                <a class=" relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'transactions' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('transactions') }}">Transazioni</a>
-                                <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'suppliers' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('suppliers') }}">Fornitori</a>
+                                <a class=" relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'transactions' || Route::currentRouteName() === 'transactions.show' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('transactions') }}">Transazioni</a>
+                                <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'suppliers' || Route::currentRouteName() === 'suppliers.show' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('suppliers') }}">Fornitori</a>
                             </nav>
                             @endauth
                         </div>

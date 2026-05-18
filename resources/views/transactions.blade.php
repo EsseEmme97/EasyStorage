@@ -130,26 +130,22 @@
                     </thead>
                     <tbody class="[&_tr:last-child]:border-0">
                         {{-- Mock data rows --}}
-                        <tr class="border-b transition-colors hover:bg-muted/50">
-                            <td class="p-4 align-middle">#TR-001</td>
-                            <td class="p-4 align-middle font-medium">Scaffale Industriale</td>
-                            <td class="p-4 align-middle">Fornitore 1</td>
-                            <td class="p-4 align-middle">
-                                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Entrata</span>
-                            </td>
-                            <td class="p-4 align-middle">08/05/2026</td>
-                            <td class="p-4 align-middle text-right text-muted-foreground cursor-pointer hover:text-primary">Dettagli</td>
-                        </tr>
-                        <tr class="border-b transition-colors hover:bg-muted/50">
-                            <td class="p-4 align-middle">#TR-002</td>
-                            <td class="p-4 align-middle font-medium">Cassetta Plastica R32</td>
-                            <td class="p-4 align-middle">Fornitore 2   </td>
-                            <td class="p-4 align-middle">
-                                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">Uscita</span>
-                            </td>
-                            <td class="p-4 align-middle">07/05/2026</td>
-                            <td class="p-4 align-middle text-right text-muted-foreground cursor-pointer hover:text-primary">Dettagli</td>
-                        </tr>
+                        @forelse ($transactions ?? [] as $transaction)
+                            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <td class="h-12 px-4 align-middle">{{ $transaction->id }}</td>
+                                <td class="h-12 px-4 align-middle">{{ $transaction->description }}</td>
+                                <td class="h-12 px-4 align-middle">{{ $transaction->supplier?->name ?? '-' }}</td>
+                                <td class="h-12 px-4 align-middle">{{ ucfirst($transaction->type) }}</td>
+                                <td class="h-12 px-4 align-middle">{{ $transaction->created_at?->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td class="h-12 px-4 text-right align-middle">
+                                    <a href="{{ route('transactions.show', $transaction) }}" class="text-blue-600 hover:underline">Visualizza</a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="h-12 px-4 text-center text-muted-foreground font-bold">Nessuna transazione trovata.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Supplier;
+use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
@@ -51,7 +51,7 @@ class SupplierController extends Controller
             ->with('success', 'Fornitore creato con successo.');
     }
 
-    public function show(Supplier $supplier)
+    public function showDetails(Supplier $supplier)
     {
         $supplier->loadCount('transactions');
 
@@ -67,5 +67,18 @@ class SupplierController extends Controller
         return redirect()
             ->route('suppliers')
             ->with('success', 'Fornitore eliminato con successo.');
+    }
+
+    public function update(Request $request, Supplier $supplier)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
+        $supplier->update($validated);
+
+        return redirect()
+            ->route('suppliers.show', $supplier)
+            ->with('success', 'Fornitore aggiornato con successo.');
     }
 }
