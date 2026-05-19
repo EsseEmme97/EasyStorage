@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\InventoryDashboardController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TransactionsController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,10 @@ Route::get('/transactions/{transaction}', [TransactionsController::class, 'showD
 Route::post('/transactions/{transaction}/details', [TransactionsController::class, 'storeDetails'])
     ->middleware('auth')
     ->name('transactions.details.store');
+
+Route::get('/inventory-dashboard', [InventoryDashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('inventory.dashboard');
 
 Route::get('/suppliers', [SupplierController::class, 'index'])
     ->middleware('auth')

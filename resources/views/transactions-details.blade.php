@@ -57,11 +57,20 @@
                             id="product_name"
                             name="product_name"
                             type="text"
+                            list="product_name_suggestions"
                             value="{{ old('product_name') }}"
                             required
                             class="mt-1 w-full rounded-md border px-3 py-2"
                             placeholder="Es. Kick pant"
                         >
+                        <datalist id="product_name_suggestions"></datalist>
+                        <div
+                            id="product-suggestions-config"
+                            class="hidden"
+                            data-transaction-type="{{ $transaction->type }}"
+                            data-product-suggestions='@json($productSuggestionsByUnit)'
+                        ></div>
+                        <p id="product-suggestion-fallback" class="mt-1 text-xs text-amber-700 hidden"></p>
                         @error('product_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -176,29 +185,38 @@
                                 <td class="h-12 px-4 align-middle">{{ strtoupper($detail->unit) }}</td>
                                 <td class="h-12 px-4 align-middle">
                                     @if ($detail->unit === 'sizes')
-                                        <div class="overflow-x-auto rounded-md border">
-                                            <table class="min-w-90 text-xs">
-                                                <thead class="bg-muted/50">
-                                                    <tr>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">XXS</th>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">XS</th>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">S</th>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">M</th>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">L</th>
-                                                        <th class="px-2 py-1 text-left font-medium text-muted-foreground">XL</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr class="border-t">
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 'xxs', 0) }}</td>
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 'xs', 0) }}</td>
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 's', 0) }}</td>
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 'm', 0) }}</td>
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 'l', 0) }}</td>
-                                                        <td class="px-2 py-1">{{ data_get($detail->quantity, 'xl', 0) }}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                        @php
+                                            $sizesTotal = collect(['xxs', 'xs', 's', 'm', 'l', 'xl'])
+                                                ->sum(fn ($size) => (int) data_get($detail->quantity, $size, 0));
+                                        @endphp
+                                        <div class="flex flex-wrap items-start gap-3">
+                                            <div class="overflow-x-auto rounded-md border">
+                                                <table class="min-w-90 text-xs">
+                                                    <thead class="bg-muted/50">
+                                                        <tr>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">XXS</th>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">XS</th>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">S</th>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">M</th>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">L</th>
+                                                            <th class="px-2 py-1 text-left font-medium text-muted-foreground">XL</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="border-t">
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xxs', 0) }}</td>
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xs', 0) }}</td>
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 's', 0) }}</td>
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'm', 0) }}</td>
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'l', 0) }}</td>
+                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xl', 0) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <span class="inline-flex items-center rounded-md border bg-muted/40 px-2 py-1 text-xs font-semibold whitespace-nowrap">
+                                                Totale: {{ $sizesTotal }}
+                                            </span>
                                         </div>
                                     @else
                                         {{ data_get($detail->quantity, 'value', '-') }}

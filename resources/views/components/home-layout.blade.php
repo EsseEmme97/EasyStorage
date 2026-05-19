@@ -41,7 +41,7 @@
     <body class="min-h-screen bg-background font-sans antialiased text-foreground">
         {{-- <img class="absolute top-10 rleft-10 w-lg" src="{{ asset('images/easy-storage.png') }}" alt="logo del progetto"> --}}
         <div class="relative flex min-h-screen flex-col">
-            <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
                 <div class="container flex h-14 items-center mx-auto">
                     <div class="mr-4 flex justify-between items-center w-full">
                         <div class="flex items-center">
@@ -51,6 +51,7 @@
                             @auth
                             <nav class="flex items-center space-x-6 text-sm font-medium">
                                 <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'home' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground': '' }}" href="/">Home</a>
+                                <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'inventory.dashboard' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('inventory.dashboard') }}">Dashboard</a>
                                 <a class=" relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'transactions' || Route::currentRouteName() === 'transactions.show' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('transactions') }}">Transazioni</a>
                                 <a class="relative transition-colors text-foreground hover:text-foreground/60 {{ Route::currentRouteName() === 'suppliers' || Route::currentRouteName() === 'suppliers.show' ? 'before:absolute before:bottom-0 before:w-full before:h-px before:bg-foreground' : '' }}" href="{{ route('suppliers') }}">Fornitori</a>
                             </nav>

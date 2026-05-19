@@ -5,6 +5,14 @@ const sizesWrapper = document.getElementById('sizes-wrapper');
 const sizeInputs = sizesWrapper
 	? sizesWrapper.querySelectorAll('input[name^="quantity["]')
 	: [];
+const productSuggestionsConfig = document.getElementById('product-suggestions-config');
+const productNameSuggestions = document.getElementById('product_name_suggestions');
+const productSuggestionFallback = document.getElementById('product-suggestion-fallback');
+
+const productSuggestionsByUnit = productSuggestionsConfig
+	? JSON.parse(productSuggestionsConfig.dataset.productSuggestions || '{}')
+	: {};
+const transactionType = productSuggestionsConfig?.dataset.transactionType || '';
 
 function syncQuantityInputs() {
 	if (!unitSelect || !quantityInput || !quantityValueWrapper || !sizesWrapper) {
@@ -23,7 +31,45 @@ function syncQuantityInputs() {
 	});
 }
 
+function syncProductSuggestions() {
+	if (!unitSelect || !productNameSuggestions) {
+		return;
+	}
+
+	const currentSuggestions = productSuggestionsByUnit[unitSelect.value] || [];
+
+	productNameSuggestions.innerHTML = '';
+	currentSuggestions.forEach((suggestion) => {
+		const option = document.createElement('option');
+		option.value = suggestion;
+		productNameSuggestions.append(option);
+	});
+
+	if (!productSuggestionFallback) {
+		return;
+	}
+
+	if (transactionType !== 'out') {
+		productSuggestionFallback.classList.add('hidden');
+		productSuggestionFallback.textContent = '';
+		return;
+	}
+
+	if (currentSuggestions.length === 0) {
+		productSuggestionFallback.textContent = 'Nessun prodotto disponibile per questa unita. Inserimento bloccato se la quantita supera la disponibilita confermata.';
+		productSuggestionFallback.classList.remove('hidden');
+		return;
+	}
+
+	productSuggestionFallback.classList.add('hidden');
+	productSuggestionFallback.textContent = '';
+}
+
 if (unitSelect) {
-	unitSelect.addEventListener('change', syncQuantityInputs);
+	unitSelect.addEventListener('change', () => {
+		syncQuantityInputs();
+		syncProductSuggestions();
+	});
 	syncQuantityInputs();
+	syncProductSuggestions();
 }
