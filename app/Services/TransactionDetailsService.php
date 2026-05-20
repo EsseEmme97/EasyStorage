@@ -3,15 +3,60 @@
 namespace App\Services;
 
 use App\Models\TransactionDetail;
+use Illuminate\Support\Collection;
 
 class TransactionDetailsService
 {
+    /**
+     * @return array<int, array{name: string, unit: string, quantity: array<string, int|float>}>
+     */
+    public static function getAvailableProductSuggestions(bool $inOut): array
+    {
+        $transactionType = $inOut ? 'in' : 'out';
+
+        $groupedDetails = TransactionDetail::query()
+            ->with('transaction:id,type,status')
+            ->whereHas('transaction', function ($query) use ($transactionType): void {
+                $query
+                    ->where('type', $transactionType)
+                    ->where('status', 'confirmed');
+            })
+            ->latest('id')
+            ->get()
+            ->groupBy(fn (TransactionDetail $detail): string => self::normalizeProductName((string) $detail->product_name));
+
+        $suggestions = $groupedDetails
+            ->map(function (Collection $details): ?array {
+                $latestDetail = $details->first();
+
+                if (! $latestDetail instanceof TransactionDetail) {
+                    return null;
+                }
+
+                $unit = (string) $latestDetail->unit;
+                $quantity = $unit === 'sizes'
+                    ? self::sumSizesQuantities($details)
+                    : ['value' => self::sumValueQuantities($details)];
+
+                return [
+                    'name' => (string) $latestDetail->product_name,
+                    'unit' => $unit,
+                    'quantity' => $quantity,
+                ];
+            })
+            ->filter()
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+
+        /** @var array<int, array{name: string, unit: string, quantity: array<string, int|float>}> $suggestions */
+        return $suggestions;
+    }
+
     public static function getAvailableProducts(bool $inOut): array
     {
-        $availableItems = TransactionDetail::query()
-            ->whereHas('transaction', fn ($query) => $query->where('type', $inOut ? 'in' : 'out'))
-            ->get()
-            ->pluck('product_name')
+        $availableItems = collect(self::getAvailableProductSuggestions($inOut))
+            ->pluck('name')
             ->unique()
             ->values()
             ->all();
@@ -65,5 +110,31 @@ class TransactionDetailsService
     public static function normalizeProductName(string $productName): string
     {
         return mb_strtolower(trim($productName));
+    }
+
+    /**
+     * @param  Collection<int, TransactionDetail>  $details
+     * @return array{xxs: int, xs: int, s: int, m: int, l: int, xl: int}
+     */
+    private static function sumSizesQuantities(Collection $details): array
+    {
+        $sizeKeys = ['xxs', 'xs', 's', 'm', 'l', 'xl'];
+        $totals = array_fill_keys($sizeKeys, 0);
+
+        foreach ($details as $detail) {
+            foreach ($sizeKeys as $size) {
+                $totals[$size] += (int) data_get($detail->quantity, $size, 0);
+            }
+        }
+
+        return $totals;
+    }
+
+    /**
+     * @param  Collection<int, TransactionDetail>  $details
+     */
+    private static function sumValueQuantities(Collection $details): float
+    {
+        return (float) $details->sum(fn (TransactionDetail $detail): float => (float) data_get($detail->quantity, 'value', 0));
     }
 }

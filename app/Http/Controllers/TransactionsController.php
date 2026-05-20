@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransactionDetailRequest;
+use App\Http\Requests\UpdateTransactionDetailRequest;
 use App\Models\Supplier;
 use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use App\Services\TransactionDetailsService;
 use Illuminate\Http\Request;
 
@@ -37,10 +39,12 @@ class TransactionsController extends Controller
     public function showDetails(Transaction $transaction)
     {
         $transaction->load(['supplier', 'details']);
+        $availableProductSuggestions = TransactionDetailsService::getAvailableProductSuggestions($transaction->type === 'in');
 
         return view('transactions-details', [
             'transaction' => $transaction,
-            'availableProducts' => TransactionDetailsService::getAvailableProducts($transaction->type === 'in'),
+            'availableProducts' => collect($availableProductSuggestions)->pluck('name')->all(),
+            'availableProductSuggestions' => $availableProductSuggestions,
         ]);
     }
 
@@ -51,5 +55,35 @@ class TransactionsController extends Controller
         return redirect()
             ->route('transactions.show', $transaction)
             ->with('success', 'Dettaglio transazione aggiunto con successo.');
+    }
+
+    public function updateDetails(
+        UpdateTransactionDetailRequest $request,
+        Transaction $transaction,
+        TransactionDetail $transactionDetail
+    ) {
+        $this->ensureDetailBelongsToTransaction($transaction, $transactionDetail);
+
+        $transactionDetail->update($request->validatedPayload());
+
+        return redirect()
+            ->route('transactions.show', $transaction)
+            ->with('success', 'Dettaglio transazione aggiornato con successo.');
+    }
+
+    public function destroyDetails(Transaction $transaction, TransactionDetail $transactionDetail)
+    {
+        $this->ensureDetailBelongsToTransaction($transaction, $transactionDetail);
+
+        TransactionDetail::destroy($transactionDetail->getKey());
+
+        return redirect()
+            ->route('transactions.show', $transaction)
+            ->with('success', 'Dettaglio transazione eliminato con successo.');
+    }
+
+    private function ensureDetailBelongsToTransaction(Transaction $transaction, TransactionDetail $transactionDetail): void
+    {
+        abort_unless($transactionDetail->transaction_id === $transaction->getKey(), 404);
     }
 }

@@ -67,6 +67,7 @@
                             id="product-suggestions-config"
                             class="hidden"
                             data-available-products='@json($availableProducts)'
+                            data-available-product-suggestions='@json($availableProductSuggestions)'
                         ></div>
                         <p id="product-suggestion-fallback" class="mt-1 text-xs text-amber-700 hidden"></p>
                         @error('product_name')
@@ -173,14 +174,30 @@
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Unita</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Quantita</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Data</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Azioni</th>
                         </tr>
                     </thead>
                     <tbody class="[&_tr:last-child]:border-0">
                         @forelse ($transaction->details as $detail)
+                            @php
+                                $updateFormId = 'update-detail-'.$detail->id;
+                            @endphp
                             <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                 <td class="h-12 px-4 align-middle">{{ $detail->id }}</td>
-                                <td class="h-12 px-4 align-middle">{{ $detail->product_name }}</td>
-                                <td class="h-12 px-4 align-middle">{{ strtoupper($detail->unit) }}</td>
+                                <td class="h-12 px-4 align-middle">
+                                    <input
+                                        form="{{ $updateFormId }}"
+                                        type="text"
+                                        name="product_name"
+                                        value="{{ $detail->product_name }}"
+                                        class="w-full min-w-36 rounded-md border px-3 py-2"
+                                        required
+                                    >
+                                </td>
+                                <td class="h-12 px-4 align-middle">
+                                    <span>{{ strtoupper($detail->unit) }}</span>
+                                    <input form="{{ $updateFormId }}" type="hidden" name="unit" value="{{ $detail->unit }}">
+                                </td>
                                 <td class="h-12 px-4 align-middle">
                                     @if ($detail->unit === 'sizes')
                                         @php
@@ -202,12 +219,24 @@
                                                     </thead>
                                                     <tbody>
                                                         <tr class="border-t">
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xxs', 0) }}</td>
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xs', 0) }}</td>
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 's', 0) }}</td>
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'm', 0) }}</td>
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'l', 0) }}</td>
-                                                            <td class="px-2 py-1">{{ data_get($detail->quantity, 'xl', 0) }}</td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[xxs]" value="{{ data_get($detail->quantity, 'xxs', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[xs]" value="{{ data_get($detail->quantity, 'xs', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[s]" value="{{ data_get($detail->quantity, 's', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[m]" value="{{ data_get($detail->quantity, 'm', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[l]" value="{{ data_get($detail->quantity, 'l', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
+                                                            <td class="px-2 py-1">
+                                                                <input form="{{ $updateFormId }}" type="number" min="0" step="1" inputmode="numeric" name="quantity[xl]" value="{{ data_get($detail->quantity, 'xl', 0) }}" class="w-16 rounded-md border px-2 py-1">
+                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -217,14 +246,42 @@
                                             </span>
                                         </div>
                                     @else
-                                        {{ data_get($detail->quantity, 'value', '-') }}
+                                        <input
+                                            form="{{ $updateFormId }}"
+                                            type="number"
+                                            step="0.01"
+                                            min="0.01"
+                                            name="quantity[value]"
+                                            value="{{ data_get($detail->quantity, 'value', 0) }}"
+                                            class="w-full min-w-28 rounded-md border px-3 py-2"
+                                            required
+                                        >
                                     @endif
                                 </td>
                                 <td class="h-12 px-4 align-middle">{{ $detail->created_at?->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td class="h-12 px-4 align-middle">
+                                    <div class="flex flex-wrap gap-2">
+                                        <form id="{{ $updateFormId }}" action="{{ route('transactions.details.update', [$transaction, $detail]) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                                                Aggiorna
+                                            </button>
+                                        </form>
+
+                                        <form action="{{ route('transactions.details.destroy', [$transaction, $detail]) }}" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare questo dettaglio?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-3 border border-red-300 text-red-700 hover:bg-red-50">
+                                                Elimina
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="h-12 px-4 text-center text-muted-foreground font-bold">Nessun dettaglio presente per questa transazione.</td>
+                                <td colspan="6" class="h-12 px-4 text-center text-muted-foreground font-bold">Nessun dettaglio presente per questa transazione.</td>
                             </tr>
                         @endforelse
                     </tbody>

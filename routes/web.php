@@ -28,6 +28,14 @@ Route::post('/transactions/{transaction}/details', [TransactionsController::clas
     ->middleware('auth')
     ->name('transactions.details.store');
 
+Route::put('/transactions/{transaction}/details/{transactionDetail}', [TransactionsController::class, 'updateDetails'])
+    ->middleware('auth')
+    ->name('transactions.details.update');
+
+Route::delete('/transactions/{transaction}/details/{transactionDetail}', [TransactionsController::class, 'destroyDetails'])
+    ->middleware('auth')
+    ->name('transactions.details.destroy');
+
 Route::get('/inventory-dashboard', [InventoryDashboardController::class, 'index'])
     ->middleware('auth')
     ->name('inventory.dashboard');

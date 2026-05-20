@@ -135,7 +135,7 @@
                                 <td class="h-12 px-4 align-middle">{{ $transaction->id }}</td>
                                 <td class="h-12 px-4 align-middle">{{ $transaction->description }}</td>
                                 <td class="h-12 px-4 align-middle">{{ $transaction->supplier?->name ?? '-' }}</td>
-                                <td class="h-12 px-4 align-middle">{{ ucfirst($transaction->type) }}</td>
+                                <td class="h-12 px-4 align-middle"> <span class="{{ $transaction->type == "in" ? "bg-emerald-300" : "bg-red-300" }} p-1 block w-10 rounded-3xl text-center">{{ ucfirst($transaction->type) }}</span></td>
                                 <td class="h-12 px-4 align-middle">{{ $transaction->created_at?->format('d/m/Y H:i') ?? '-' }}</td>
                                 <td class="h-12 px-4 text-right align-middle">
                                     <a href="{{ route('transactions.show', $transaction) }}" class="text-blue-600 hover:underline">Visualizza</a>
