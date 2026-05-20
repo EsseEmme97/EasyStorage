@@ -58,18 +58,16 @@ class StoreTransactionDetailRequest extends FormRequest
                     return;
                 }
 
-                $service = app(TransactionDetailsService::class);
-
                 if ($this->input('unit') !== 'sizes') {
                     if ($transaction->type !== 'out') {
                         return;
                     }
 
                     $unit = (string) $this->input('unit');
-                    $normalizedProductName = $service->normalizeProductName((string) $this->input('product_name', ''));
+                    $normalizedProductName = TransactionDetailsService::normalizeProductName((string) $this->input('product_name', ''));
                     $requestedQuantity = (float) data_get($this->input('quantity', []), 'value', 0);
                     $availableQuantity = (float) data_get(
-                        $service->getConfirmedAvailableQuantity($normalizedProductName, $unit),
+                        TransactionDetailsService::getConfirmedAvailableQuantity($normalizedProductName, $unit),
                         'value',
                         0
                     );
@@ -94,8 +92,8 @@ class StoreTransactionDetailRequest extends FormRequest
                     return;
                 }
 
-                $normalizedProductName = $service->normalizeProductName((string) $this->input('product_name', ''));
-                $availableQuantitiesBySize = $service->getConfirmedAvailableQuantity($normalizedProductName, 'sizes');
+                $normalizedProductName = TransactionDetailsService::normalizeProductName((string) $this->input('product_name', ''));
+                $availableQuantitiesBySize = TransactionDetailsService::getConfirmedAvailableQuantity($normalizedProductName, 'sizes');
 
                 foreach ($sizeKeys as $size) {
                     $requestedQuantity = (int) data_get($this->input('quantity', []), $size, 0);

@@ -9,10 +9,9 @@ const productSuggestionsConfig = document.getElementById('product-suggestions-co
 const productNameSuggestions = document.getElementById('product_name_suggestions');
 const productSuggestionFallback = document.getElementById('product-suggestion-fallback');
 
-const productSuggestionsByUnit = productSuggestionsConfig
-	? JSON.parse(productSuggestionsConfig.dataset.productSuggestions || '{}')
-	: {};
-const transactionType = productSuggestionsConfig?.dataset.transactionType || '';
+const availableProducts = productSuggestionsConfig
+	? JSON.parse(productSuggestionsConfig.dataset.availableProducts || '[]')
+	: [];
 
 function syncQuantityInputs() {
 	if (!unitSelect || !quantityInput || !quantityValueWrapper || !sizesWrapper) {
@@ -32,14 +31,12 @@ function syncQuantityInputs() {
 }
 
 function syncProductSuggestions() {
-	if (!unitSelect || !productNameSuggestions) {
+	if (!productNameSuggestions) {
 		return;
 	}
 
-	const currentSuggestions = productSuggestionsByUnit[unitSelect.value] || [];
-
 	productNameSuggestions.innerHTML = '';
-	currentSuggestions.forEach((suggestion) => {
+	availableProducts.forEach((suggestion) => {
 		const option = document.createElement('option');
 		option.value = suggestion;
 		productNameSuggestions.append(option);
@@ -49,14 +46,8 @@ function syncProductSuggestions() {
 		return;
 	}
 
-	if (transactionType !== 'out') {
-		productSuggestionFallback.classList.add('hidden');
-		productSuggestionFallback.textContent = '';
-		return;
-	}
-
-	if (currentSuggestions.length === 0) {
-		productSuggestionFallback.textContent = 'Nessun prodotto disponibile per questa unita. Inserimento bloccato se la quantita supera la disponibilita confermata.';
+	if (availableProducts.length === 0) {
+		productSuggestionFallback.textContent = 'Nessun prodotto disponibile. Inserimento bloccato se la quantita supera la disponibilita confermata.';
 		productSuggestionFallback.classList.remove('hidden');
 		return;
 	}

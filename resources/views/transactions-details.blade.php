@@ -5,7 +5,6 @@
 	<x-slot:additionalAsset>
 		resources/js/transactionsDetails.js
 	</x-slot:additionalAsset>
-
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <div class="space-y-1">
@@ -67,8 +66,7 @@
                         <div
                             id="product-suggestions-config"
                             class="hidden"
-                            data-transaction-type="{{ $transaction->type }}"
-                            data-product-suggestions='@json($productSuggestionsByUnit)'
+                            data-available-products='@json($availableProducts)'
                         ></div>
                         <p id="product-suggestion-fallback" class="mt-1 text-xs text-amber-700 hidden"></p>
                         @error('product_name')

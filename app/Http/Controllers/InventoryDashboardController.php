@@ -64,7 +64,7 @@ class InventoryDashboardController extends Controller
                         $outQuantity = $row['out'][$size];
 
                         $row['in_storage'][$size] = max($inQuantity - $outQuantity, 0);
-                        $row['outside_storage'][$size] = max($outQuantity - $inQuantity, 0);
+                        $row['outside_storage'][$size] = $outQuantity;
                         $row['available'][$size] = $row['in_storage'][$size];
                     }
 
@@ -82,7 +82,7 @@ class InventoryDashboardController extends Controller
                 $outValue = (float) data_get($row, 'out.value', 0);
 
                 $row['in_storage']['value'] = max($inValue - $outValue, 0);
-                $row['outside_storage']['value'] = max($outValue - $inValue, 0);
+                $row['outside_storage']['value'] = $outValue;
                 $row['available']['value'] = $row['in_storage']['value'];
 
                 return $row;

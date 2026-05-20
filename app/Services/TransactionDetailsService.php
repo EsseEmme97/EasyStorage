@@ -6,110 +6,22 @@ use App\Models\TransactionDetail;
 
 class TransactionDetailsService
 {
-    public function getProductSuggestionsByUnit(string $transactionType): array
+    public static function getAvailableProducts(bool $inOut): array
     {
-        $units = ['sizes', 'kg', 'mt', 'pcs'];
-        $suggestions = collect($units)->mapWithKeys(fn (string $unit) => [$unit => []])->all();
-
-        if ($transactionType === 'out') {
-            return $this->getAvailableProductSuggestionsByUnit();
-        }
-
-        $seen = [];
-
-        TransactionDetail::query()
-            ->select(['product_name', 'unit'])
-            ->where('product_name', '!=', '')
-            ->latest('id')
+        $availableItems = TransactionDetail::query()
+            ->whereHas('transaction', fn ($query) => $query->where('type', $inOut ? 'in' : 'out'))
             ->get()
-            ->each(function (TransactionDetail $detail) use (&$suggestions, &$seen) {
-                $unit = $detail->unit;
+            ->pluck('product_name')
+            ->unique()
+            ->values()
+            ->all();
 
-                if (! array_key_exists($unit, $suggestions)) {
-                    return;
-                }
+        sort($availableItems, SORT_NATURAL | SORT_FLAG_CASE);
 
-                $normalizedName = $this->normalizeProductName((string) $detail->product_name);
-
-                if ($normalizedName === '' || isset($seen[$unit][$normalizedName])) {
-                    return;
-                }
-
-                $suggestions[$unit][] = trim((string) $detail->product_name);
-                $seen[$unit][$normalizedName] = true;
-            });
-
-        foreach ($units as $unit) {
-            sort($suggestions[$unit], SORT_NATURAL | SORT_FLAG_CASE);
-        }
-
-        return $suggestions;
+        return $availableItems;
     }
 
-    private function getAvailableProductSuggestionsByUnit(): array
-    {
-        $units = ['sizes', 'kg', 'mt', 'pcs'];
-        $availableByUnit = collect($units)->mapWithKeys(fn (string $unit) => [$unit => []])->all();
-        $displayNames = [];
-
-        $confirmedDetails = TransactionDetail::query()
-            ->with(['transaction:id,type,status'])
-            ->whereHas('transaction', fn ($query) => $query->where('status', 'confirmed'))
-            ->get();
-
-        foreach ($confirmedDetails as $detail) {
-            $unit = $detail->unit;
-
-            if (! array_key_exists($unit, $availableByUnit)) {
-                continue;
-            }
-
-            $normalizedName = $this->normalizeProductName((string) $detail->product_name);
-
-            if ($normalizedName === '') {
-                continue;
-            }
-
-            $displayNames[$unit][$normalizedName] ??= trim((string) $detail->product_name);
-            $delta = $detail->transaction?->type === 'in' ? 1 : -1;
-
-            if ($unit === 'sizes') {
-                foreach (['xxs', 'xs', 's', 'm', 'l', 'xl'] as $size) {
-                    $availableByUnit[$unit][$normalizedName][$size] =
-                        ($availableByUnit[$unit][$normalizedName][$size] ?? 0)
-                        + ($delta * (int) data_get($detail->quantity, $size, 0));
-                }
-
-                continue;
-            }
-
-            $availableByUnit[$unit][$normalizedName]['value'] =
-                ($availableByUnit[$unit][$normalizedName]['value'] ?? 0)
-                + ($delta * (float) data_get($detail->quantity, 'value', 0));
-        }
-
-        $suggestions = collect($units)->mapWithKeys(fn (string $unit) => [$unit => []])->all();
-
-        foreach ($availableByUnit as $unit => $products) {
-            foreach ($products as $normalizedName => $quantityByUnit) {
-                $hasStock = $unit === 'sizes'
-                    ? collect(['xxs', 'xs', 's', 'm', 'l', 'xl'])->contains(fn (string $size) => (int) data_get($quantityByUnit, $size, 0) > 0)
-                    : (float) data_get($quantityByUnit, 'value', 0) > 0;
-
-                if (! $hasStock) {
-                    continue;
-                }
-
-                $suggestions[$unit][] = $displayNames[$unit][$normalizedName] ?? $normalizedName;
-            }
-
-            sort($suggestions[$unit], SORT_NATURAL | SORT_FLAG_CASE);
-        }
-
-        return $suggestions;
-    }
-
-    public function getConfirmedAvailableQuantity(string $normalizedProductName, string $unit): array
+    public static function getConfirmedAvailableQuantity(string $normalizedProductName, string $unit): array
     {
         $defaults = $unit === 'sizes'
             ? ['xxs' => 0, 'xs' => 0, 's' => 0, 'm' => 0, 'l' => 0, 'xl' => 0]
@@ -150,7 +62,7 @@ class TransactionDetailsService
         return ['value' => $value];
     }
 
-    public function normalizeProductName(string $productName): string
+    public static function normalizeProductName(string $productName): string
     {
         return mb_strtolower(trim($productName));
     }

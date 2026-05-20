@@ -10,8 +10,6 @@ use Illuminate\Http\Request;
 
 class TransactionsController extends Controller
 {
-    public function __construct(private readonly TransactionDetailsService $transactionDetailsService) {}
-
     public function index()
     {
         return view('transactions', [
@@ -40,11 +38,9 @@ class TransactionsController extends Controller
     {
         $transaction->load(['supplier', 'details']);
 
-        $productSuggestionsByUnit = $this->transactionDetailsService->getProductSuggestionsByUnit($transaction->type);
-
         return view('transactions-details', [
             'transaction' => $transaction,
-            'productSuggestionsByUnit' => $productSuggestionsByUnit,
+            'availableProducts' => TransactionDetailsService::getAvailableProducts($transaction->type === 'in'),
         ]);
     }
 
