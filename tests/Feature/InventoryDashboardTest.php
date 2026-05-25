@@ -126,3 +126,63 @@ test('it computes outstanding outside quantities per size after partial returns'
         ->and((int) data_get($row, 'totals.outside_storage'))->toBe(4)
         ->and((int) data_get($row, 'totals.in_storage'))->toBe(16);
 });
+
+test('it exposes outside by supplier breakdown when optional column is enabled', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $initialSupplier = Supplier::create(['name' => 'Supplier Start']);
+    $processingSupplier = Supplier::create(['name' => 'Supplier Process']);
+
+    $initialLoad = Transaction::create([
+        'description' => 'Ingresso iniziale',
+        'type' => 'in',
+        'status' => 'confirmed',
+        'supplier_id' => $initialSupplier->id,
+    ]);
+    TransactionDetail::create([
+        'transaction_id' => $initialLoad->id,
+        'product_name' => 'Felpa Zip',
+        'unit' => 'pcs',
+        'quantity' => ['value' => 50],
+    ]);
+
+    $outbound = Transaction::create([
+        'description' => 'Invio esterno',
+        'type' => 'out',
+        'status' => 'confirmed',
+        'supplier_id' => $processingSupplier->id,
+    ]);
+    TransactionDetail::create([
+        'transaction_id' => $outbound->id,
+        'product_name' => 'Felpa Zip',
+        'unit' => 'pcs',
+        'quantity' => ['value' => 20],
+    ]);
+
+    $returned = Transaction::create([
+        'description' => 'Rientro parziale',
+        'type' => 'in',
+        'status' => 'confirmed',
+        'supplier_id' => $processingSupplier->id,
+    ]);
+    TransactionDetail::create([
+        'transaction_id' => $returned->id,
+        'product_name' => 'Felpa Zip',
+        'unit' => 'pcs',
+        'quantity' => ['value' => 5],
+    ]);
+
+    actingAs($user);
+    $response = get(route('inventory.dashboard', ['show_outside_suppliers' => 1]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('showOutsideSuppliers', true);
+    $response->assertSeeText('Fuori per Fornitore');
+    $response->assertSeeText('Supplier Process:');
+
+    $row = collect($response->viewData('rows'))->first();
+    $outsideBySupplier = collect(data_get($row, 'outside_by_supplier'));
+
+    expect((float) data_get($row, 'outside_storage.value'))->toBe(15.0)
+        ->and((float) data_get($outsideBySupplier->firstWhere('supplier', 'Supplier Process'), 'value'))->toBe(15.0);
+});

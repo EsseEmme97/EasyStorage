@@ -9,12 +9,20 @@
                 <h1 class="text-3xl font-bold tracking-tight">Dashboard Inventario</h1>
                 <p class="text-muted-foreground">Vista real-time applicativa basata sulle sole transazioni confermate.</p>
             </div>
-            <a
-                href="{{ route('transactions') }}"
-                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-            >
-                Vai a Transazioni
-            </a>
+            <div class="flex items-center gap-2">
+                <a
+                    href="{{ route('inventory.dashboard', ['show_outside_suppliers' => $showOutsideSuppliers ? 0 : 1]) }}"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                >
+                    {{ $showOutsideSuppliers ? 'Nascondi dettaglio fornitori' : 'Mostra dettaglio fornitori' }}
+                </a>
+                <a
+                    href="{{ route('transactions') }}"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                >
+                    Vai a Transazioni
+                </a>
+            </div>
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
@@ -43,6 +51,9 @@
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Totale OUT</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">In Storage</th>
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Outside Storage</th>
+                            @if ($showOutsideSuppliers)
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fuori per Fornitore</th>
+                            @endif
                             <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Stato</th>
                         </tr>
                     </thead>
@@ -123,6 +134,28 @@
                                         {{ number_format($row['outside_storage']['value'], 2, ',', '.') }}
                                     @endif
                                 </td>
+                                @if ($showOutsideSuppliers)
+                                    <td class="h-12 px-4 align-middle">
+                                        @if (count($row['outside_by_supplier']) === 0)
+                                            <span class="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-700">
+                                                Nessuna uscita aperta
+                                            </span>
+                                        @else
+                                            <div class="space-y-1">
+                                                @foreach ($row['outside_by_supplier'] as $outsideItem)
+                                                    <span class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">
+                                                        {{ $outsideItem['supplier'] }}:
+                                                        @if ($row['unit'] === 'sizes')
+                                                            {{ $outsideItem['total'] }}
+                                                        @else
+                                                            {{ number_format($outsideItem['value'], 2, ',', '.') }}
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td>
+                                @endif
                                 <td class="h-12 px-4 align-middle">
                                     @php
                                         $hasInStorage = $row['unit'] === 'sizes'
@@ -154,7 +187,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="h-12 px-4 text-center text-muted-foreground font-bold">
+                                <td colspan="{{ $showOutsideSuppliers ? 8 : 7 }}" class="h-12 px-4 text-center text-muted-foreground font-bold">
                                     Nessun prodotto disponibile. Conferma almeno una transazione per popolare la dashboard.
                                 </td>
                             </tr>
