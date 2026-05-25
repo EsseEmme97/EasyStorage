@@ -10,12 +10,20 @@ class InventoryDashboardController extends Controller
     public function index(): View
     {
         $products = [];
+        $outsideBalances = [];
         $sizeKeys = ['xxs', 'xs', 's', 'm', 'l', 'xl'];
 
         $confirmedDetails = TransactionDetail::query()
-            ->with(['transaction:id,type,status'])
+            ->with(['transaction:id,type,status,supplier_id,created_at'])
             ->whereHas('transaction', fn ($query) => $query->where('status', 'confirmed'))
-            ->get();
+            ->get()
+            ->sortBy(function (TransactionDetail $detail): string {
+                $transactionTimestamp = $detail->transaction?->created_at?->getTimestamp() ?? 0;
+                $transactionId = $detail->transaction_id ?? 0;
+
+                return sprintf('%015d-%015d-%015d', $transactionTimestamp, $transactionId, $detail->id);
+            })
+            ->values();
 
         foreach ($confirmedDetails as $detail) {
             $unit = $detail->unit;
@@ -32,6 +40,7 @@ class InventoryDashboardController extends Controller
             }
 
             $isInbound = $detail->transaction?->type === 'in';
+            $supplierKey = (string) ($detail->transaction?->supplier_id ?? 0);
 
             if ($unit === 'sizes') {
                 foreach ($sizeKeys as $size) {
@@ -39,8 +48,15 @@ class InventoryDashboardController extends Controller
 
                     if ($isInbound) {
                         $products[$productKey]['in'][$size] += $quantity;
+
+                        $outsideBalances[$productKey][$supplierKey][$size] = max(
+                            ((int) data_get($outsideBalances, $productKey.'.'.$supplierKey.'.'.$size, 0)) - $quantity,
+                            0
+                        );
                     } else {
                         $products[$productKey]['out'][$size] += $quantity;
+                        $outsideBalances[$productKey][$supplierKey][$size] =
+                            ((int) data_get($outsideBalances, $productKey.'.'.$supplierKey.'.'.$size, 0)) + $quantity;
                     }
                 }
 
@@ -51,20 +67,36 @@ class InventoryDashboardController extends Controller
 
             if ($isInbound) {
                 $products[$productKey]['in']['value'] += $quantity;
+
+                $outsideBalances[$productKey][$supplierKey]['value'] = max(
+                    ((float) data_get($outsideBalances, $productKey.'.'.$supplierKey.'.value', 0)) - $quantity,
+                    0
+                );
             } else {
                 $products[$productKey]['out']['value'] += $quantity;
+                $outsideBalances[$productKey][$supplierKey]['value'] =
+                    ((float) data_get($outsideBalances, $productKey.'.'.$supplierKey.'.value', 0)) + $quantity;
             }
         }
 
         $dashboardRows = collect($products)
-            ->map(function (array $row) use ($sizeKeys) {
+            ->map(function (array $row, string $productKey) use ($outsideBalances, $sizeKeys) {
                 if ($row['unit'] === 'sizes') {
+                    $outsideBySize = collect(data_get($outsideBalances, $productKey, []))
+                        ->reduce(function (array $carry, array $supplierOutside) use ($sizeKeys): array {
+                            foreach ($sizeKeys as $size) {
+                                $carry[$size] += (int) data_get($supplierOutside, $size, 0);
+                            }
+
+                            return $carry;
+                        }, array_fill_keys($sizeKeys, 0));
+
                     foreach ($sizeKeys as $size) {
                         $inQuantity = $row['in'][$size];
                         $outQuantity = $row['out'][$size];
 
                         $row['in_storage'][$size] = max($inQuantity - $outQuantity, 0);
-                        $row['outside_storage'][$size] = $outQuantity;
+                        $row['outside_storage'][$size] = (int) data_get($outsideBySize, $size, 0);
                         $row['available'][$size] = $row['in_storage'][$size];
                     }
 
@@ -80,9 +112,11 @@ class InventoryDashboardController extends Controller
 
                 $inValue = (float) data_get($row, 'in.value', 0);
                 $outValue = (float) data_get($row, 'out.value', 0);
+                $outsideValue = (float) collect(data_get($outsideBalances, $productKey, []))
+                    ->sum(fn (array $supplierOutside): float => (float) data_get($supplierOutside, 'value', 0));
 
                 $row['in_storage']['value'] = max($inValue - $outValue, 0);
-                $row['outside_storage']['value'] = $outValue;
+                $row['outside_storage']['value'] = $outsideValue;
                 $row['available']['value'] = $row['in_storage']['value'];
 
                 return $row;
