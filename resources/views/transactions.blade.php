@@ -138,7 +138,17 @@
                                 <td class="h-12 px-4 align-middle"> <span class="{{ $transaction->type == "in" ? "bg-emerald-300" : "bg-red-300" }} p-1 block w-10 rounded-3xl text-center">{{ ucfirst($transaction->type) }}</span></td>
                                 <td class="h-12 px-4 align-middle">{{ $transaction->created_at?->format('d/m/Y H:i') ?? '-' }}</td>
                                 <td class="h-12 px-4 text-right align-middle">
-                                    <a href="{{ route('transactions.show', $transaction) }}" class="text-blue-600 hover:underline">Visualizza</a>
+                                    <div class="inline-flex items-center gap-3">
+                                        <a href="{{ route('transactions.show', $transaction) }}" class="text-blue-600 hover:underline">Visualizza</a>
+                                        <button
+                                            type="button"
+                                            class="text-red-600 hover:underline delete-transaction-trigger"
+                                            data-delete-url="{{ route('transactions.destroy', $transaction) }}"
+                                            data-transaction-label="#{{ $transaction->id }}{{ $transaction->description ? ' - ' . $transaction->description : '' }}"
+                                        >
+                                            Elimina
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -148,6 +158,30 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="delete-transaction-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+            <div class="w-full max-w-lg rounded-md border bg-background p-6 shadow-xl space-y-4">
+                <div class="space-y-1">
+                    <h3 class="text-lg font-semibold text-red-700">Conferma eliminazione transazione</h3>
+                    <p class="text-sm text-muted-foreground">
+                        Stai per eliminare la transazione
+                        <span id="delete-transaction-target" class="font-semibold text-foreground"></span>.
+                        Questa azione e irreversibile e rimuovera definitivamente anche tutti i dettagli associati.
+                    </p>
+                </div>
+
+                <form id="delete-transaction-form" method="POST" class="flex justify-end gap-2">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" id="cancel-delete-transaction" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                        Annulla
+                    </button>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700">
+                        Elimina definitivamente
+                    </button>
+                </form>
             </div>
         </div>
     </div>

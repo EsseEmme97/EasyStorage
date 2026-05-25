@@ -24,6 +24,10 @@ Route::get('/transactions/{transaction}', [TransactionsController::class, 'showD
     ->middleware('auth')
     ->name('transactions.show');
 
+Route::delete('/transactions/{transaction}', [TransactionsController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('transactions.destroy');
+
 Route::post('/transactions/{transaction}/details', [TransactionsController::class, 'storeDetails'])
     ->middleware('auth')
     ->name('transactions.details.store');

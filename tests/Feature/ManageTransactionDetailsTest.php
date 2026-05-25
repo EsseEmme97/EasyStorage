@@ -64,3 +64,36 @@ test('it deletes a transaction detail', function () {
     $response->assertRedirect(route('transactions.show', $transaction));
     expect(TransactionDetail::query()->whereKey($detail->id)->exists())->toBeFalse();
 });
+
+test('it deletes a transaction and all associated details', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $transaction = Transaction::create([
+        'description' => 'Uscita completa',
+        'type' => 'out',
+        'status' => 'confirmed',
+    ]);
+
+    TransactionDetail::create([
+        'transaction_id' => $transaction->id,
+        'product_name' => 'Felpa',
+        'unit' => 'pcs',
+        'quantity' => ['value' => 20],
+    ]);
+
+    TransactionDetail::create([
+        'transaction_id' => $transaction->id,
+        'product_name' => 'T-Shirt',
+        'unit' => 'sizes',
+        'quantity' => ['xxs' => 0, 'xs' => 0, 's' => 2, 'm' => 3, 'l' => 1, 'xl' => 0],
+    ]);
+
+    actingAs($user);
+
+    $response = delete(route('transactions.destroy', $transaction));
+
+    $response->assertRedirect(route('transactions'));
+
+    expect(Transaction::query()->whereKey($transaction->id)->exists())->toBeFalse()
+        ->and(TransactionDetail::query()->where('transaction_id', $transaction->id)->exists())->toBeFalse();
+});

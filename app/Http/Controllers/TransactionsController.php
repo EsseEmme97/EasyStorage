@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Services\TransactionDetailsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransactionsController extends Controller
 {
@@ -55,6 +56,18 @@ class TransactionsController extends Controller
         return redirect()
             ->route('transactions.show', $transaction)
             ->with('success', 'Dettaglio transazione aggiunto con successo.');
+    }
+
+    public function destroy(Transaction $transaction)
+    {
+        DB::transaction(function () use ($transaction): void {
+            $transaction->details()->delete();
+            Transaction::destroy($transaction->getKey());
+        });
+
+        return redirect()
+            ->route('transactions')
+            ->with('success', 'Transazione eliminata con successo. Azione irreversibile: i dettagli associati sono stati rimossi.');
     }
 
     public function updateDetails(
